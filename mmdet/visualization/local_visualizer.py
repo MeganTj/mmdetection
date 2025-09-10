@@ -19,7 +19,7 @@ from ..registry import VISUALIZERS
 from ..structures import DetDataSample
 from ..structures.mask import BitmapMasks, PolygonMasks, bitmap_to_polygon
 from .palette import _get_adaptive_scales, get_palette, jitter_color
-
+from .filter_utils import filter_overlapping_bboxes, filter_smaller_contained_bboxes
 
 @VISUALIZERS.register_module()
 class DetLocalVisualizer(Visualizer):
@@ -233,6 +233,142 @@ class DetLocalVisualizer(Visualizer):
                             'edgecolor': 'none'
                         }])
         return self.get_image()
+    
+
+    def _draw_instances_with_indices(self, image: np.ndarray, instances: ['InstanceData'],
+                        classes: Optional[List[str]],
+                        palette: Optional[List[tuple]],
+                        index_font_size: int = 12) -> np.ndarray:
+        """Draw instances with index labels instead of class names.
+
+        Args:
+            image (np.ndarray): The image to draw.
+            instances (:obj:`InstanceData`): Data structure for
+                instance-level annotations or predictions.
+            classes (List[str], optional): Category information.
+            palette (List[tuple], optional): Palette information
+                corresponding to the category.
+            index_font_size (int): Font size multiplier for index labels.
+                Defaults to 24.
+
+        Returns:
+            np.ndarray: the drawn image which channel is RGB.
+        """
+        self.set_image(image)
+        # import pdb; pdb.set_trace()
+        if 'bboxes' in instances and instances.bboxes.sum() > 0:
+            bboxes = instances.bboxes
+            # Filter bounding boxes
+            bboxes = filter_smaller_contained_bboxes(bboxes)
+
+            labels = instances.labels
+
+            max_label = int(max(labels) if len(labels) > 0 else 0)
+            text_palette = get_palette(self.text_color, max_label + 1)
+            text_colors = [text_palette[label] for label in labels]
+
+            bbox_color = palette if self.bbox_color is None \
+                else self.bbox_color
+            bbox_palette = get_palette(bbox_color, max_label + 1)
+            colors = [bbox_palette[label] for label in labels]
+            
+            self.draw_bboxes(
+                bboxes,
+                edge_colors=colors,
+                alpha=self.alpha,
+                line_widths=self.line_width)
+
+            # Position text outside the bounding box (above the top-left corner)
+            positions = bboxes[:, :2].clone()
+            positions[:, 1] -= 15  # Move text 15 pixels above the bounding box
+
+            areas = (bboxes[:, 3] - bboxes[:, 1]) * (
+                bboxes[:, 2] - bboxes[:, 0])
+            scales = _get_adaptive_scales(areas)
+            # Create index labels starting from 1
+            for i, pos in enumerate(positions):
+                index_text = str(i + 1)  # Index starting from 1
+
+                self.draw_texts(
+                    index_text,
+                    pos,
+                    colors=(255, 0, 0),  # Red text
+                    font_sizes=int(index_font_size))
+            # Create index labels starting from 1
+            # for i, pos in enumerate(positions):
+            #     index_text = str(i + 1)  # Index starting from 1
+
+            #     self.draw_texts(
+            #         index_text,
+            #         pos,
+            #         colors=(255, 255, 255),  # White text
+            #         font_sizes=int(index_font_size * scales[i]),
+            #         bboxes=[{
+            #             'facecolor': 'black',
+            #             'alpha': 0.8,
+            #             'pad': 0.7,
+            #             'edgecolor': 'none'
+            #         }])
+
+        if 'masks' in instances:
+            labels = instances.labels
+            masks = instances.masks
+            if isinstance(masks, torch.Tensor):
+                masks = masks.numpy()
+            elif isinstance(masks, (PolygonMasks, BitmapMasks)):
+                masks = masks.to_ndarray()
+
+            masks = masks.astype(bool)
+
+            max_label = int(max(labels) if len(labels) > 0 else 0)
+            mask_color = palette if self.mask_color is None \
+                else self.mask_color
+            mask_palette = get_palette(mask_color, max_label + 1)
+            colors = [jitter_color(mask_palette[label]) for label in labels]
+            text_palette = get_palette(self.text_color, max_label + 1)
+            text_colors = [text_palette[label] for label in labels]
+
+            polygons = []
+            for i, mask in enumerate(masks):
+                contours, _ = bitmap_to_polygon(mask)
+                polygons.extend(contours)
+            self.draw_polygons(polygons, edge_colors='w', alpha=self.alpha)
+            self.draw_binary_masks(masks, colors=colors, alphas=self.alpha)
+
+            if len(labels) > 0 and \
+                    ('bboxes' not in instances or
+                     instances.bboxes.sum() == 0):
+                # instances.bboxes.sum()==0 represent dummy bboxes.
+                # A typical example of SOLO does not exist bbox branch.
+                areas = []
+                positions = []
+                for mask in masks:
+                    _, _, stats, centroids = cv2.connectedComponentsWithStats(
+                        mask.astype(np.uint8), connectivity=8)
+                    if stats.shape[0] > 1:
+                        largest_id = np.argmax(stats[1:, -1]) + 1
+                        positions.append(centroids[largest_id])
+                        areas.append(stats[largest_id, -1])
+                areas = np.stack(areas, axis=0)
+                scales = _get_adaptive_scales(areas)
+
+                # Create index labels for masks (when no bboxes)
+                for i, pos in enumerate(positions):
+                    index_text = str(i + 1)  # Index starting from 1
+
+                    self.draw_texts(
+                        index_text,
+                        pos,
+                        colors=(255, 255, 255),  # White text
+                        font_sizes=int(index_font_size * scales[i]),
+                        horizontal_alignments='center',
+                        bboxes=[{
+                            'facecolor': 'black',
+                            'alpha': 0.8,
+                            'pad': 0.7,
+                            'edgecolor': 'none'
+                        }])
+        return self.get_image()
 
     def _draw_panoptic_seg(self, image: np.ndarray,
                            panoptic_seg: ['PixelData'],
@@ -389,12 +525,13 @@ class DetLocalVisualizer(Visualizer):
 
         return self.get_image()
 
-    @master_only
+    # @master_only
     def add_datasample(
             self,
             name: str,
             image: np.ndarray,
             data_sample: Optional['DetDataSample'] = None,
+            with_indices: bool = False,
             draw_gt: bool = True,
             draw_pred: bool = True,
             show: bool = False,
@@ -441,6 +578,7 @@ class DetLocalVisualizer(Visualizer):
             data_sample = data_sample.cpu()
 
         if draw_gt and data_sample is not None:
+            # import pdb; pdb.set_trace()
             gt_img_data = image
             if 'gt_instances' in data_sample:
                 gt_img_data = self._draw_instances(image,
@@ -465,8 +603,12 @@ class DetLocalVisualizer(Visualizer):
                 pred_instances = data_sample.pred_instances
                 pred_instances = pred_instances[
                     pred_instances.scores > pred_score_thr]
-                pred_img_data = self._draw_instances(image, pred_instances,
-                                                     classes, palette)
+                if with_indices:
+                    pred_img_data = self._draw_instances_with_indices(
+                        image, pred_instances, classes, palette)
+                else:
+                    pred_img_data = self._draw_instances(image, pred_instances,
+                                                        classes, palette)
 
             if 'pred_sem_seg' in data_sample:
                 pred_img_data = self._draw_sem_seg(pred_img_data,
