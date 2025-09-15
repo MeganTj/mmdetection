@@ -47,6 +47,8 @@ def weight_reduce_loss(loss: Tensor,
     """
     # if weight is specified, apply element-wise weight
     if weight is not None:
+        if loss.dim() == 2 and weight.dim() == 1:
+            weight = weight.unsqueeze(1)
         loss = loss * weight
 
     # if avg_factor is not specified, just reduce the loss

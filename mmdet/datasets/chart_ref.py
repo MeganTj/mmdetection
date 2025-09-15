@@ -36,6 +36,7 @@ class ChartRefDataset(BaseDetDataset):
                 data_list = [json.loads(line) for line in f]
 
         out_data_list = []
+        num_regions = 0
         for data in data_list:
             data_info = {}
             img_path = osp.join(self.data_prefix['img'], data['filename'])
@@ -66,6 +67,7 @@ class ChartRefDataset(BaseDetDataset):
                 instance['bbox_label'] = i
                 # instances.append(instance)
                 curr_data_info['instances'] = [instance]
+                num_regions += 1
                 out_data_list.append(curr_data_info)
                 # if not isinstance(bbox[0], list):
                 #     bbox = [bbox]
@@ -87,4 +89,5 @@ class ChartRefDataset(BaseDetDataset):
             # out_data_list.append(data_info)
 
         del data_list
+        print(f'number of regions: {num_regions}')
         return out_data_list

@@ -11,6 +11,13 @@ __pycache__/
 *images*
 *.pickle
 
+*.h
+*.cpp
+*.hpp
+*.gz
+*.pth
+nltk_data
+
 # Distribution / packaging
 .Python
 build/

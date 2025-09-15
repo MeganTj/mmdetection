@@ -1,9 +1,10 @@
-_base_ = './faster-rcnn_r50_fpn_1x_coco.py'
+_base_ = './rtmdet_l_8xb32-300e_coco.py'
+
+load_from = './checkpoint/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth'
 
 model = dict(
-    roi_head=dict(
-        bbox_head=dict(
-            num_classes=1)))
+    bbox_head=dict(
+        num_classes=1))
 
 data_root = 'data/chart/'
 metainfo = {
@@ -13,8 +14,9 @@ metainfo = {
     ]
 }
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=2,
     dataset=dict(
+        _delete_=True,
         data_root=data_root,
         metainfo=metainfo,
         ann_file='questions_multistep_descriptive_train_full_coco.json',
@@ -31,8 +33,8 @@ test_dataloader = val_dataloader
 val_evaluator = dict(ann_file=data_root + 'questions_multistep_descriptive_test_full_coco.json')
 test_evaluator = val_evaluator
 
-interval = 1  # Validate every epoch
-max_epochs = 100  # Increased epochs for small dataset
+interval = 1
+max_epochs = 50
 
 train_cfg = dict(
     max_epochs=max_epochs,
@@ -41,18 +43,6 @@ train_cfg = dict(
 default_hooks = dict(
     checkpoint=dict(
         interval=interval,
-        max_keep_ckpts=5,
+        max_keep_ckpts=10,
         save_best='auto'
     ))
-
-param_scheduler = [
-    dict(
-        type='LinearLR', start_factor=0.001, by_epoch=False, begin=0, end=500),
-    dict(
-        type='MultiStepLR',
-        begin=0,
-        end=max_epochs,
-        by_epoch=True,
-        milestones=[70, 90],  # Reduce LR at these epochs
-        gamma=0.1)
-]

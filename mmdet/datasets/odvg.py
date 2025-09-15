@@ -36,6 +36,7 @@ class ODVGDataset(BaseDetDataset):
                 data_list = [json.loads(line) for line in f]
 
         out_data_list = []
+        num_regions = 0
         for data in data_list:
             data_info = {}
             img_path = osp.join(self.data_prefix['img'], data['filename'])
@@ -86,8 +87,10 @@ class ODVGDataset(BaseDetDataset):
                         inter_w = max(0, min(x2, data['width']) - max(x1, 0))
                         inter_h = max(0, min(y2, data['height']) - max(y1, 0))
                         if inter_w * inter_h == 0:
+                            print(f'skip empty box: {box} in {data_info["img_path"]}')
                             continue
                         if (x2 - x1) < 1 or (y2 - y1) < 1:
+                            print(f'skip small box: {box} in {data_info["img_path"]}')
                             continue
                         instance['ignore_flag'] = 0
                         instance['bbox'] = box
@@ -96,6 +99,7 @@ class ODVGDataset(BaseDetDataset):
                             'phrase': phrase,
                             'tokens_positive': tokens_positive
                         }
+                        num_regions += 1
                         instances.append(instance)
                 data_info['instances'] = instances
                 data_info['phrases'] = phrases
@@ -103,4 +107,5 @@ class ODVGDataset(BaseDetDataset):
                 out_data_list.append(data_info)
 
         del data_list
+        print(f'number of regions: {num_regions}')
         return out_data_list

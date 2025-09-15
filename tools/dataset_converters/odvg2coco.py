@@ -63,7 +63,16 @@ def odvg2coco(args):
         #         # Determine which subdirectory to use - you might need logic here
         #         # For now, defaulting to v2
         #         filename = f'images/v2/{filename}'
-        
+
+        skip_image = False
+        # import pdb; pdb.set_trace()
+        for ft in args.filter_types:
+            if filename.startswith(ft):
+                skip_image = True
+                break
+        if skip_image:
+            continue
+
         image_info = {
             "id": img_id,
             "file_name": filename,
@@ -118,6 +127,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser('ODVG to COCO format converter.', add_help=True)
     parser.add_argument('input', type=str, help='input ODVG jsonlines file name')
+    parser.add_argument('--filter_types', type=str, nargs='+', default=['density'], help='list of object types to include')
     parser.add_argument('--output', '-o', type=str, help='output COCO json file name')
     
     args = parser.parse_args()

@@ -12,6 +12,14 @@ from mmdet.structures import SampleList
 from mmdet.utils import ConfigType, OptConfigType, OptMultiConfig
 from .single_stage import SingleStageDetector
 
+# At the top of your file, do this once
+import nltk
+try:
+    nltk.data.find('tokenizers/punkt')
+    nltk.data.find('taggers/averaged_perceptron_tagger')
+except LookupError:
+    nltk.download('punkt', download_dir='~/nltk_data', quiet=True)
+    nltk.download('averaged_perceptron_tagger', download_dir='~/nltk_data', quiet=True)
 
 def find_noun_phrases(caption: str) -> list:
     """Find noun phrases in a caption using nltk.
@@ -25,13 +33,13 @@ def find_noun_phrases(caption: str) -> list:
         >>> caption = 'There is two cat and a remote in the picture'
         >>> find_noun_phrases(caption) # ['cat', 'a remote', 'the picture']
     """
-    try:
-        import nltk
-        nltk.download('punkt', download_dir='~/nltk_data')
-        nltk.download('averaged_perceptron_tagger', download_dir='~/nltk_data')
-    except ImportError:
-        raise RuntimeError('nltk is not installed, please install it by: '
-                           'pip install nltk.')
+    # try:
+    #     import nltk
+    #     nltk.download('punkt', download_dir='~/nltk_data')
+    #     nltk.download('averaged_perceptron_tagger', download_dir='~/nltk_data')
+    # except ImportError:
+    #     raise RuntimeError('nltk is not installed, please install it by: '
+    #                        'pip install nltk.')
 
     caption = caption.lower()
     tokens = nltk.word_tokenize(caption)
@@ -79,6 +87,7 @@ def run_ner(caption: str) -> Tuple[list, list]:
     noun_phrases = find_noun_phrases(caption)
     noun_phrases = [remove_punctuation(phrase) for phrase in noun_phrases]
     noun_phrases = [phrase for phrase in noun_phrases if phrase != '']
+    print(caption)
     print('noun_phrases:', noun_phrases)
     relevant_phrases = noun_phrases
     labels = noun_phrases

@@ -1,4 +1,4 @@
-_base_ = 'grounding_dino_swin-t_pretrain_obj365.py'
+_base_ = 'grounding_dino_swin-b_pretrain_all.py'
 
 data_root = 'data/chart/'
 class_name = ('data', )
@@ -63,7 +63,7 @@ train_pipeline = [
 #     backend_args=None))
 
 train_dataloader = dict(
-    batch_size=1,
+    batch_size=8,
     dataset=dict(
         _delete_=True,
         type='CocoDataset',
@@ -72,7 +72,7 @@ train_dataloader = dict(
         return_classes=True,
         pipeline=train_pipeline,
         filter_cfg=dict(filter_empty_gt=False, min_size=32),
-        ann_file='questions_multistep_descriptive_train_coco.json',
+        ann_file='questions_multistep_descriptive_train_full_coco.json',
         data_prefix=dict(img='images/'))
 )
 
@@ -94,19 +94,19 @@ test_pipeline = [
 ]
 
 val_dataloader = dict(
-    batch_size=8,
+    batch_size=16,
     dataset=dict(
         metainfo=metainfo,
         data_root=data_root,
-        ann_file='questions_multistep_descriptive_test_coco.json',
+        ann_file='questions_multistep_descriptive_test_full_coco.json',
         data_prefix=dict(img='images/')))
 
 test_dataloader = val_dataloader
 
-val_evaluator = dict(ann_file=data_root + 'questions_multistep_descriptive_test_coco.json')
+val_evaluator = dict(ann_file=data_root + 'questions_multistep_descriptive_test_full_coco.json')
 test_evaluator = val_evaluator
 
-max_epoch = 20
+max_epoch = 35
 
 default_hooks = dict(
     checkpoint=dict(interval=1, max_keep_ckpts=1, save_best='auto'),
@@ -120,7 +120,7 @@ param_scheduler = [
         begin=0,
         end=max_epoch,
         by_epoch=True,
-        milestones=[15],
+        milestones=[30],
         gamma=0.1)
 ]
 
@@ -133,7 +133,9 @@ optim_wrapper = dict(
             'language_model': dict(lr_mult=0.0)
         }))
 
-load_from = 'https://download.openmmlab.com/mmdetection/v3.0/mm_grounding_dino/grounding_dino_swin-t_pretrain_obj365_goldg_grit9m_v3det/grounding_dino_swin-t_pretrain_obj365_goldg_grit9m_v3det_20231204_095047-b448804b.pth'  # noqa
+load_from = 'https://download.openmmlab.com/mmdetection/v3.0/mm_grounding_dino/grounding_dino_swin-b_pretrain_all/grounding_dino_swin-b_pretrain_all-f9818a7c.pth'  # noqa
+
+work_dir = "od_work_dir/mmgd_pre_big"
 
 # val_dataloader = dict(
 #     dataset=dict(
