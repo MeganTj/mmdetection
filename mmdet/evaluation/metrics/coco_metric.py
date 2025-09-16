@@ -588,9 +588,13 @@ class CocoMetric(BaseMetric):
                     eval_results[key] = float(f'{round(val, 3)}')
 
                 ap = coco_eval.stats[:6]
-                logger.info(f'{metric}_mAP_copypaste: {ap[0]:.3f} '
-                            f'{ap[1]:.3f} {ap[2]:.3f} {ap[3]:.3f} '
-                            f'{ap[4]:.3f} {ap[5]:.3f}')
+                ar = coco_eval.stats[6:]
+                logger.info(f'{metric}_mAP_copypaste: mAP = {ap[0]:.3f} '
+                            f'mAP_50 = {ap[1]:.3f} mAP_75 = {ap[2]:.3f} mAP_s = {ap[3]:.3f} '
+                            f'mAP_m = {ap[4]:.3f} mAP_l = {ap[5]:.3f}')
+                logger.info(f'{metric}_AR_copypaste: AR@100 = {ar[0]:.3f} '
+                            f'AR@300 = {ar[1]:.3f} AR@1000 = {ar[2]:.3f} AR_s@1000 = {ar[3]:.3f} '
+                            f'AR_m@1000 = {ar[4]:.3f} AR_l@1000 = {ar[5]:.3f}')
 
         if tmp_dir is not None:
             tmp_dir.cleanup()
