@@ -142,8 +142,6 @@ dependencies:
       - matplotlib==3.7.5
       - mdurl==0.1.2
       - mmcv==2.1.0
-      - mmdeploy==1.0.0rc3
-      - mmdeploy-python==1.0.0rc3
       - mmengine==0.10.7
       - model-index==0.1.11
       - multiprocess==0.70.18
