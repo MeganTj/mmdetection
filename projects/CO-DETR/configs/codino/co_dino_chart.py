@@ -9,7 +9,7 @@ metainfo = {
 }
 
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=1,
     dataset=dict(
         data_root=data_root,
         metainfo=metainfo,
@@ -46,6 +46,6 @@ param_scheduler = [
         begin=0,
         end=max_epochs,
         by_epoch=True,
-        milestones=[10],
+        milestones=[18],
         gamma=0.1)
 ]

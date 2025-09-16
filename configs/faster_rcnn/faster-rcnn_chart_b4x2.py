@@ -13,7 +13,7 @@ metainfo = {
     ]
 }
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=1,
     dataset=dict(
         data_root=data_root,
         metainfo=metainfo,
