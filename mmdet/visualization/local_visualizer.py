@@ -19,7 +19,7 @@ from ..registry import VISUALIZERS
 from ..structures import DetDataSample
 from ..structures.mask import BitmapMasks, PolygonMasks, bitmap_to_polygon
 from .palette import _get_adaptive_scales, get_palette, jitter_color
-from .filter_utils import filter_overlapping_bboxes, filter_smaller_contained_bboxes
+from .utils import filter_overlapping_bboxes, filter_smaller_contained_bboxes
 
 @VISUALIZERS.register_module()
 class DetLocalVisualizer(Visualizer):
