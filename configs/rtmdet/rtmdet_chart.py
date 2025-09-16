@@ -1,6 +1,6 @@
 _base_ = './rtmdet_l_8xb32-300e_coco.py'
 
-load_from = './checkpoint/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth'
+load_from = 'rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth'
 
 model = dict(
     bbox_head=dict(
@@ -16,7 +16,7 @@ metainfo = {
 train_dataloader = dict(
     batch_size=2,
     dataset=dict(
-        _delete_=True,
+        # _delete_=True,
         data_root=data_root,
         metainfo=metainfo,
         ann_file='questions_multistep_descriptive_train_full_coco.json',

@@ -32,7 +32,7 @@ test_evaluator = val_evaluator
 
 # Training configuration for small dataset
 interval = 1  # Validate every epoch
-max_epochs = 100  # Increased epochs for small dataset
+max_epochs = 120  # Increased epochs for small dataset
 
 # Optimizer configuration (add this section)
 # optim_wrapper = dict(
