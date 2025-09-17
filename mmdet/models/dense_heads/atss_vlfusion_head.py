@@ -905,9 +905,12 @@ class ATSSVLFusionHead(ATSSHead):
                 -1, self.bbox_coder.encode_size)
             score_factor = score_factor.permute(1, 2, 0).reshape(-1).sigmoid()
 
-            scores = convert_grounding_to_cls_scores(
-                logits=cls_logit.sigmoid()[None],
-                positive_maps=[token_positive_maps])[0]
+            if token_positive_maps is not None:
+                scores = convert_grounding_to_cls_scores(
+                    logits=cls_logit.sigmoid()[None],
+                    positive_maps=[token_positive_maps])[0]
+            else:
+                scores = cls_logit.sigmoid()
 
             results = filter_scores_and_topk(
                 scores, score_thr, nms_pre,
