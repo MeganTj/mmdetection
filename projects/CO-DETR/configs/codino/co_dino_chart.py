@@ -1,4 +1,4 @@
-_base_ = 'co_dino_5scale_swin_l_16xb1_16e_o365tococo.py'
+_base_ = './my_co_dino_5scale_swin_l_16xb1_16e_o365tococo.py'
 
 data_root = 'data/chart/'
 metainfo = {
