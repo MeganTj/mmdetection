@@ -161,7 +161,7 @@ train_dataloader = dict(
 
 
 val_dataloader = dict(
-    batch_size=16,
+    batch_size=4,
     dataset=dict(
         # metainfo=metainfo,
         type='ChartRefDataset',

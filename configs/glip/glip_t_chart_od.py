@@ -1,4 +1,4 @@
-_base_ = './glip_atss_swin-t_b_fpn_dyhead_16xb2_ms-2x_funtune_coco.py'
+_base_ = './glip_atss_swin-t_fpn_dyhead_pretrain_obj365-goldg-cc3m-sub.py'
 
 load_from = 'https://download.openmmlab.com/mmdetection/v3.0/glip/glip_tiny_mmdet-c24ce662.pth'  # noqa
 lang_model_name = 'bert-base-uncased'
@@ -143,8 +143,7 @@ test_pipeline = [
     dict(
         type='PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
-                   'scale_factor', 'text', 'custom_entities',
-                   'tokens_positive'))
+                   'scale_factor', 'text', 'custom_entities'))
 ]
 
 train_dataloader = dict(

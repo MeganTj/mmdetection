@@ -1,4 +1,4 @@
-_base_ = './glip_atss_swin-t_b_fpn_dyhead_16xb2_ms-2x_funtune_coco.py'
+_base_ = './glip_atss_swin-t_fpn_dyhead_pretrain_obj365-goldg-cc3m-sub.py'
 
 load_from = 'https://download.openmmlab.com/mmdetection/v3.0/glip/glip_tiny_mmdet-c24ce662.pth'  # noqa
 lang_model_name = 'bert-base-uncased'
@@ -162,7 +162,7 @@ test_pipeline = [
 # )
 
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=1,
     dataset=dict(
     _delete_=True,
     type='ODVGDataset',
@@ -178,7 +178,7 @@ train_dataloader = dict(
 
 
 val_dataloader = dict(
-    batch_size=16,
+    batch_size=4,
     dataset=dict(
         # metainfo=metainfo,
         type='ChartRefDataset',
