@@ -203,6 +203,7 @@ optim_wrapper = dict(
             'absolute_pos_embed': dict(decay_mult=0.),
             'relative_position_bias_table': dict(decay_mult=0.),
             'norm': dict(decay_mult=0.),
-            'language_model': dict(lr_mult=0.0)
+            'language_model': dict(lr_mult=0.0),
+            'backbone': dict(lr_mult=0.0),
         }),
     clip_grad=None)

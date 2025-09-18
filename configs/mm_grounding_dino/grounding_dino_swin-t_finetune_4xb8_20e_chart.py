@@ -106,7 +106,7 @@ test_dataloader = val_dataloader
 val_evaluator = dict(ann_file=data_root + 'questions_multistep_descriptive_test_full_coco.json')
 test_evaluator = val_evaluator
 
-max_epoch = 50
+max_epoch = 100
 
 default_hooks = dict(
     checkpoint=dict(interval=1, max_keep_ckpts=1, save_best='auto'),

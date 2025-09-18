@@ -28,7 +28,7 @@ val_evaluator = dict(ann_file=data_root + 'questions_multistep_descriptive_test_
 test_evaluator = val_evaluator
 
 interval = 1  # Validate every 5 epochs instead of every epoch
-max_epochs = 20  # Increased epochs for small dataset
+max_epochs = 30  # Increased epochs for small dataset
 
 train_cfg = dict(
     val_interval=interval,
